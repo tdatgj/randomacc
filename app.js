@@ -1,6 +1,10 @@
 // Global variables
-let currentUser = null;
-let userData = null;
+if (typeof currentUser === 'undefined') {
+    var currentUser = null;
+}
+if (typeof userData === 'undefined') {
+    var userData = null;
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
