@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Roblox Account Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="telegram-bot.js"></script>
+    <script src="app.js"></script>
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+        
+        .admin-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .admin-section h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 0.5rem;
+        }
+        
+        .deposit-request {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e1e5e9;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .deposit-info {
+            flex: 1;
+        }
+        
+        .deposit-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .btn-reject {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .user-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e1e5e9;
+            border-radius: 5px;
+        }
+        
+        .user-info h4 {
+            margin-bottom: 0.25rem;
+            color: #333;
+        }
+        
+        .user-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .user-balance {
+            font-weight: 700;
+            color: #4caf50;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="header-content">
+                <div class="header-info">
+                    <h1><i class="fas fa-cog"></i> Admin Panel</h1>
+                    <p>Quản lý hệ thống Roblox Account Store</p>
+                </div>
+                <button onclick="logoutAdmin()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+            </div>
+            <div style="margin-top: 1rem;">
+                <a href="game-accounts.html" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); color: white; text-decoration: none; margin-right: 1rem;">
+                    <i class="fas fa-gamepad"></i> Quản lý tài khoản game
+                </a>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3>Tổng Users</h3>
+                <div class="number" id="total-users">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tổng Doanh Thu</h3>
+                <div class="number" id="total-revenue">0 VNĐ</div>
+            </div>
+            <div class="stat-card">
+                <h3>Yêu Cầu Nạp Tiền</h3>
+                <div class="number" id="pending-deposits">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tài Khoản Đã Bán</h3>
+                <div class="number" id="accounts-sold">0</div>
+            </div>
+        </div>
+        
+        <!-- Deposit Requests -->
+        <div class="admin-section">
+            <h2><i class="fas fa-credit-card"></i> Yêu Cầu Nạp Tiền</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchAdminTab('bank')">Chuyển khoản</button>
+                <button class="tab-btn" onclick="switchAdminTab('card')">Thẻ điện thoại</button>
+            </div>
+            <div id="deposit-requests">
+                <div class="loading">Đang tải...</div>
+            </div>
+            <div id="card-deposit-requests" style="display: none;">
+                <div class="loading">Đang tải...</div>
+            </div>
+        </div>
+        
+        <!-- User Management -->
+        <div class="admin-section">
+            <h2><i class="fas fa-users"></i> Quản Lý Users</h2>
+            <input type="text" class="search-box" id="user-search" placeholder="Tìm kiếm user...">
+            <div id="user-list">
+                <div class="loading">Đang tải...</div>
+            </div>
+        </div>
+        
+        <!-- Manual Balance Adjustment -->
+        <div class="admin-section">
+            <h2><i class="fas fa-plus-circle"></i> Điều Chỉnh Số Dư Thủ Công</h2>
+            <div class="form-group">
+                <label for="adjust-username">Username</label>
+                <input type="text" id="adjust-username" placeholder="Nhập username">
+            </div>
+            <div class="form-group">
+                <label for="adjust-amount">Số tiền (VNĐ)</label>
+                <input type="number" id="adjust-amount" placeholder="Nhập số tiền">
+            </div>
+            <div class="form-group">
+                <label for="adjust-reason">Lý do</label>
+                <input type="text" id="adjust-reason" placeholder="Nhập lý do điều chỉnh">
+            </div>
+            <button onclick="adjustBalance()" class="btn btn-primary">Điều Chỉnh</button>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Đang xử lý...</p>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <script>
+        // Global variables
+        let allUsers = [];
+        let depositRequests = [];
+        let isAuthenticated = false;
+        
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+        });
+        
+        // Check admin authentication
+        function checkAdminAuth() {
+            const adminPassword = localStorage.getItem('adminPassword');
+            if (adminPassword === 'dtd') {
+                isAuthenticated = true;
+                showAdminPanel();
+            } else {
+                showLoginForm();
+            }
+        }
+        
+        // Show login form
+        function showLoginForm() {
+            document.body.innerHTML = `
+                <div class="admin-login">
+                    <div class="login-container">
+                        <h1><i class="fas fa-shield-alt"></i> Admin Login</h1>
+                        <form onsubmit="handleAdminLogin(event)">
+                            <div class="form-group">
+                                <label for="admin-password">Mật khẩu admin:</label>
+                                <input type="password" id="admin-password" placeholder="Nhập mật khẩu" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Handle admin login
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('admin-password').value;
+            
+            if (password === 'dtd') {
+                localStorage.setItem('adminPassword', 'dtd');
+                isAuthenticated = true;
+                location.reload();
+            } else {
+                alert('Mật khẩu không đúng!');
+            }
+        }
+        
+        // Show admin panel
+        function showAdminPanel() {
+            loadAdminData();
+            loadCardDepositRequests();
+            setupEventListeners();
+        }
+        
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Đã copy: ' + text, 'success');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                showToast('Lỗi copy', 'error');
+            });
+        }
+        
+        // Logout admin
+        function logoutAdmin() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                localStorage.removeItem('adminPassword');
+                location.reload();
+            }
+        }
+
+        // Switch admin tabs
+        function switchAdminTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            if (tab === 'bank') {
+                document.getElementById('deposit-requests').style.display = 'block';
+                document.getElementById('card-deposit-requests').style.display = 'none';
+            } else if (tab === 'card') {
+                document.getElementById('deposit-requests').style.display = 'none';
+                document.getElementById('card-deposit-requests').style.display = 'block';
+            }
+        }
+
+        // Load card deposit requests
+        async function loadCardDepositRequests() {
+            try {
+                const snapshot = await db.collection('cardDepositRequests')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const container = document.getElementById('card-deposit-requests');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="no-data">Không có yêu cầu nạp thẻ nào</div>';
+                    return;
+                }
+                
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const date = data.createdAt ? data.createdAt.toDate() : new Date();
+                    const statusClass = data.status === 'approved' ? 'approved' : data.status === 'rejected' ? 'rejected' : 'pending';
+                    const statusText = data.status === 'pending' ? 'Chờ duyệt' : data.status === 'approved' ? 'Đã duyệt' : 'Từ chối';
+                    const statusIcon = data.status === 'pending' ? '⏳' : data.status === 'approved' ? '✅' : '❌';
+                    
+                    return `
+                        <div class="card-request-item ${statusClass}">
+                            <div class="card-header">
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <h4>${data.username}</h4>
+                                        <span class="request-time">${date.toLocaleString('vi-VN')}</span>
+                                    </div>
+                                </div>
+                                <div class="status-badge ${statusClass}">
+                                    ${statusIcon} ${statusText}
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="card-info-grid">
+                                    <div class="info-item">
+                                        <label>Loại thẻ:</label>
+                                        <span class="card-type ${data.cardType}">${data.cardType.toUpperCase()}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Mệnh giá:</label>
+                                        <span class="amount">${data.cardAmount.toLocaleString()} VNĐ</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Chiết khấu:</label>
+                                        <span class="discount">-${data.discountAmount.toLocaleString()} VNĐ</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>Số tiền nhận:</label>
+                                        <span class="final-amount">${data.finalAmount.toLocaleString()} VNĐ</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-credentials">
+                                    <div class="credential-item">
+                                        <label>Serial thẻ:</label>
+                                        <div class="credential-value">
+                                            <code>${data.cardSerial}</code>
+                                            <button onclick="copyToClipboard('${data.cardSerial}')" class="copy-btn" title="Copy">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="credential-item">
+                                        <label>Mã thẻ:</label>
+                                        <div class="credential-value">
+                                            <code>${data.cardCode}</code>
+                                            <button onclick="copyToClipboard('${data.cardCode}')" class="copy-btn" title="Copy">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${data.status === 'pending' ? `
+                                <div class="card-actions">
+                                    <button onclick="approveCardDeposit('${doc.id}', '${data.username}', ${data.finalAmount})" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Duyệt
+                                    </button>
+                                    <button onclick="rejectCardDeposit('${doc.id}', '${data.username}')" class="btn btn-danger">
+                                        <i class="fas fa-times"></i> Từ chối
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading card deposit requests:', error);
+                document.getElementById('card-deposit-requests').innerHTML = '<div class="error">Lỗi tải dữ liệu</div>';
+            }
+        }
+
+        // Approve card deposit
+        async function approveCardDeposit(requestId, username, amount) {
+            if (confirm(`Xác nhận duyệt nạp thẻ ${amount.toLocaleString()} VNĐ cho user ${username}?`)) {
+                showLoading(true);
+
+                try {
+                    // Get card data for Telegram
+                    const cardDoc = await db.collection('cardDepositRequests').doc(requestId).get();
+                    const cardData = cardDoc.data();
+                    
+                    // Find user
+                    const userQuery = await db.collection('users').where('username', '==', username).get();
+
+                    if (userQuery.empty) {
+                        throw new Error('Không tìm thấy user');
+                    }
+
+                    const userDoc = userQuery.docs[0];
+                    const userData = userDoc.data();
+
+                    // Update user balance
+                    const currentBalance = userData.balance || 0;
+                    const newBalance = currentBalance + amount;
+                    
+                    console.log(`Updating balance for ${username}: ${currentBalance} + ${amount} = ${newBalance}`);
+
+                    // Add transaction
+                    const transaction = {
+                        type: 'deposit',
+                        amount: amount,
+                        description: 'Nạp tiền qua thẻ điện thoại',
+                        timestamp: new Date().toISOString(),
+                        approved: true
+                    };
+
+                    const transactions = userData.transactions || [];
+                    transactions.push(transaction);
+
+                    // Update user document
+                    await db.collection('users').doc(userDoc.id).update({
+                        balance: newBalance,
+                        transactions: transactions
+                    });
+                    
+                    console.log(`Successfully updated balance for ${username} to ${newBalance}`);
+
+                    // Update card deposit request status
+                    await db.collection('cardDepositRequests').doc(requestId).update({
+                        status: 'approved',
+                        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // Send to Telegram
+                    try {
+                        const telegramData = {
+                            ...cardData,
+                            status: 'approved'
+                        };
+                        await sendApprovedCardNotification(telegramData);
+                        console.log('Card approval sent to Telegram');
+                    } catch (telegramError) {
+                        console.error('Failed to send to Telegram:', telegramError);
+                        // Don't fail the whole operation if Telegram fails
+                    }
+
+                    showToast(`Duyệt nạp thẻ thành công! User ${username} đã được cộng ${amount.toLocaleString()} VNĐ`, 'success');
+                    
+                    // Reload data
+                    loadCardDepositRequests();
+                    loadUsers(); // Reload users to update balance display
+                    
+                } catch (error) {
+                    showToast('Lỗi duyệt nạp thẻ: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+
+        // Reject card deposit
+        async function rejectCardDeposit(requestId, username) {
+            if (confirm(`Xác nhận từ chối yêu cầu nạp thẻ của user ${username}?`)) {
+                showLoading(true);
+
+                try {
+                    // Get card data for Telegram
+                    const cardDoc = await db.collection('cardDepositRequests').doc(requestId).get();
+                    const cardData = cardDoc.data();
+                    
+                    // Update card deposit request status
+                    await db.collection('cardDepositRequests').doc(requestId).update({
+                        status: 'rejected',
+                        rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // Send to Telegram
+                    try {
+                        const telegramData = {
+                            ...cardData,
+                            status: 'rejected'
+                        };
+                        await sendRejectedCardNotification(telegramData);
+                        console.log('Card rejection sent to Telegram');
+                    } catch (telegramError) {
+                        console.error('Failed to send to Telegram:', telegramError);
+                        // Don't fail the whole operation if Telegram fails
+                    }
+
+                    showToast(`Đã từ chối yêu cầu nạp thẻ của user ${username}`, 'success');
+                    
+                    // Reload data
+                    loadCardDepositRequests();
+                    
+                } catch (error) {
+                    showToast('Lỗi từ chối nạp thẻ: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // User search
+            document.getElementById('user-search').addEventListener('input', filterUsers);
+        }
+        
+        // Load admin data
+        async function loadAdminData() {
+            showLoading(true);
+            try {
+                await Promise.all([
+                    loadUsers(),
+                    loadDepositRequests(),
+                    loadStatistics()
+                ]);
+            } catch (error) {
+                showToast('Lỗi tải dữ liệu admin', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Load users
+        async function loadUsers() {
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                allUsers = [];
+                
+                usersSnapshot.forEach(doc => {
+                    allUsers.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                displayUsers(allUsers);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showToast('Lỗi tải danh sách users', 'error');
+            }
+        }
+        
+        // Display users
+        function displayUsers(users) {
+            const userList = document.getElementById('user-list');
+            
+            if (users.length === 0) {
+                userList.innerHTML = '<div class="error">Không có user nào</div>';
+                return;
+            }
+            
+            userList.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h4>${user.username}</h4>
+                        <p>Đăng ký: ${new Date(user.createdAt?.toDate() || new Date()).toLocaleDateString('vi-VN')}</p>
+                        <p>Giao dịch: ${(user.transactions || []).length} lần</p>
+                    </div>
+                    <div class="user-balance">
+                        ${(user.balance || 0).toLocaleString()} VNĐ
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Filter users
+        function filterUsers() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+            displayUsers(filteredUsers);
+        }
+        
+        // Load deposit requests
+        async function loadDepositRequests() {
+            try {
+                const requestsSnapshot = await db.collection('depositRequests').get();
+                depositRequests = [];
+                
+                requestsSnapshot.forEach(doc => {
+                    depositRequests.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                displayDepositRequests();
+            } catch (error) {
+                console.error('Error loading deposit requests:', error);
+                showToast('Lỗi tải yêu cầu nạp tiền', 'error');
+            }
+        }
+        
+        // Display deposit requests
+        function displayDepositRequests() {
+            const container = document.getElementById('deposit-requests');
+            
+            if (depositRequests.length === 0) {
+                container.innerHTML = '<div class="error">Không có yêu cầu nạp tiền nào</div>';
+                return;
+            }
+            
+            // Group by username to show only one request per user
+            const userRequests = {};
+            depositRequests.forEach(request => {
+                if (!userRequests[request.username]) {
+                    userRequests[request.username] = request;
+                }
+            });
+            
+            container.innerHTML = Object.values(userRequests).map(request => `
+                <div class="deposit-request">
+                    <div class="deposit-info">
+                        <h4>User: ${request.username}</h4>
+                        <p>Số tiền: ${request.amount.toLocaleString()} VNĐ</p>
+                        <p>Thời gian: ${new Date(request.timestamp?.toDate() || new Date()).toLocaleString('vi-VN')}</p>
+                        <p>Nội dung: ${request.description}</p>
+                        <p style="color: #ff9800; font-weight: bold;">⚠️ Mỗi user chỉ được 1 yêu cầu nạp tiền</p>
+                    </div>
+                    <div class="deposit-actions">
+                        <button onclick="approveDeposit('${request.id}', '${request.username}', ${request.amount})" class="btn-approve">
+                            Duyệt
+                        </button>
+                        <button onclick="rejectDeposit('${request.id}')" class="btn-reject">
+                            Từ chối
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Approve deposit
+        async function approveDeposit(requestId, username, amount) {
+            if (confirm(`Xác nhận duyệt nạp tiền ${amount.toLocaleString()} VNĐ cho user ${username}?`)) {
+                showLoading(true);
+                
+                try {
+                    // Find user
+                    const userQuery = await db.collection('users').where('username', '==', username).get();
+                    
+                    if (userQuery.empty) {
+                        throw new Error('Không tìm thấy user');
+                    }
+                    
+                    const userDoc = userQuery.docs[0];
+                    const userData = userDoc.data();
+                    
+                    // Update user balance
+                    const currentBalance = userData.balance || 0;
+                    const newBalance = currentBalance + amount;
+                    
+                    console.log(`Updating balance for ${username}: ${currentBalance} + ${amount} = ${newBalance}`);
+                    
+                    // Add transaction
+                    const transaction = {
+                        type: 'deposit',
+                        amount: amount,
+                        description: 'Nạp tiền qua chuyển khoản',
+                        timestamp: new Date().toISOString(),
+                        approved: true
+                    };
+                    
+                    const transactions = userData.transactions || [];
+                    transactions.push(transaction);
+                    
+                    // Update user document
+                    await db.collection('users').doc(userDoc.id).update({
+                        balance: newBalance,
+                        transactions: transactions
+                    });
+                    
+                    console.log(`Successfully updated balance for ${username} to ${newBalance}`);
+                    
+                    // Remove deposit request
+                    await db.collection('depositRequests').doc(requestId).delete();
+                    
+                    showToast(`Duyệt nạp tiền thành công! User ${username} đã được cộng ${amount.toLocaleString()} VNĐ`, 'success');
+                    
+                    // Reload data
+                    loadDepositRequests();
+                    loadUsers(); // Reload users to update balance display
+                    
+                } catch (error) {
+                    showToast('Lỗi duyệt nạp tiền: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        // Reject deposit
+        async function rejectDeposit(requestId) {
+            if (confirm('Xác nhận từ chối yêu cầu nạp tiền này?')) {
+                showLoading(true);
+                
+                try {
+                    await db.collection('depositRequests').doc(requestId).delete();
+                    showToast('Đã từ chối yêu cầu nạp tiền', 'success');
+                    loadAdminData();
+                } catch (error) {
+                    showToast('Lỗi từ chối yêu cầu: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        // Adjust balance manually
+        async function adjustBalance() {
+            const username = document.getElementById('adjust-username').value;
+            const amount = parseInt(document.getElementById('adjust-amount').value);
+            const reason = document.getElementById('adjust-reason').value;
+            
+            if (!username || !amount || !reason) {
+                showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+            
+            if (confirm(`Xác nhận điều chỉnh ${amount.toLocaleString()} VNĐ cho user ${username}?`)) {
+                showLoading(true);
+                
+                try {
+                    // Find user
+                    const userQuery = await db.collection('users').where('username', '==', username).get();
+                    
+                    if (userQuery.empty) {
+                        throw new Error('Không tìm thấy user');
+                    }
+                    
+                    const userDoc = userQuery.docs[0];
+                    const userData = userDoc.data();
+                    
+                    // Update user balance
+                    const newBalance = (userData.balance || 0) + amount;
+                    
+                    // Add transaction
+                    const transaction = {
+                        type: 'manual_adjustment',
+                        amount: amount,
+                        description: `Điều chỉnh thủ công: ${reason}`,
+                        timestamp: new Date().toISOString(),
+                        admin: true
+                    };
+                    
+                    const transactions = userData.transactions || [];
+                    transactions.push(transaction);
+                    
+                    // Update user document
+                    await db.collection('users').doc(userDoc.id).update({
+                        balance: newBalance,
+                        transactions: transactions
+                    });
+                    
+                    showToast('Điều chỉnh số dư thành công!', 'success');
+                    
+                    // Clear form
+                    document.getElementById('adjust-username').value = '';
+                    document.getElementById('adjust-amount').value = '';
+                    document.getElementById('adjust-reason').value = '';
+                    
+                    loadAdminData();
+                    
+                } catch (error) {
+                    showToast('Lỗi điều chỉnh số dư: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                // Total users
+                document.getElementById('total-users').textContent = allUsers.length;
+                
+                // Total revenue
+                let totalRevenue = 0;
+                allUsers.forEach(user => {
+                    const transactions = user.transactions || [];
+                    transactions.forEach(transaction => {
+                        if (transaction.type === 'purchase' && transaction.amount < 0) {
+                            totalRevenue += Math.abs(transaction.amount);
+                        }
+                    });
+                });
+                document.getElementById('total-revenue').textContent = totalRevenue.toLocaleString() + ' VNĐ';
+                
+                // Pending deposits
+                document.getElementById('pending-deposits').textContent = depositRequests.length;
+                
+                // Accounts sold
+                let accountsSold = 0;
+                allUsers.forEach(user => {
+                    const transactions = user.transactions || [];
+                    transactions.forEach(transaction => {
+                        if (transaction.type === 'purchase') {
+                            accountsSold++;
+                        }
+                    });
+                });
+                document.getElementById('accounts-sold').textContent = accountsSold;
+                
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+        
+        // Show loading
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            
+            document.getElementById('toast-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.getElementById('toast-container').removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
