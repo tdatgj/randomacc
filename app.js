@@ -405,8 +405,14 @@ async function buyAccountType(accountName, price, image) {
             currentUserData.transactions = currentUserData.transactions || [];
             currentUserData.transactions.push(transaction);
             
-            // Update user in database
-            await db.collection('users').doc(currentUserData.uid || 'temp').update({
+            // Find user document by username and update
+            const userQuery = await db.collection('users').where('username', '==', currentUserData.username).get();
+            if (userQuery.empty) {
+                throw new Error('Không tìm thấy user trong database');
+            }
+            
+            const userDoc = userQuery.docs[0];
+            await db.collection('users').doc(userDoc.id).update({
                 balance: newBalance,
                 transactions: currentUserData.transactions
             });
@@ -479,8 +485,14 @@ async function buyAccount(accountId, price) {
             currentUserData.transactions = currentUserData.transactions || [];
             currentUserData.transactions.push(transaction);
             
-            // Update user in database
-            await db.collection('users').doc(currentUserData.uid || 'temp').update({
+            // Find user document by username and update
+            const userQuery = await db.collection('users').where('username', '==', currentUserData.username).get();
+            if (userQuery.empty) {
+                throw new Error('Không tìm thấy user trong database');
+            }
+            
+            const userDoc = userQuery.docs[0];
+            await db.collection('users').doc(userDoc.id).update({
                 balance: newBalance,
                 transactions: currentUserData.transactions
             });

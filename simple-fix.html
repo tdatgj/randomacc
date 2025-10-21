@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Database Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: white; }
+        button { padding: 15px 30px; margin: 10px; background: #ff6b35; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #ff8c42; }
+        .result { margin: 20px 0; padding: 15px; background: #16213e; border-radius: 5px; white-space: pre-wrap; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Simple Database Fix</h1>
+    
+    <button onclick="fixDatabase()">🚀 Fix Database Now</button>
+    
+    <div id="result" class="result">Click "Fix Database Now" to start...</div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        let db;
+        
+        function log(message) {
+            const result = document.getElementById('result');
+            const timestamp = new Date().toLocaleTimeString();
+            result.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        async function fixDatabase() {
+            try {
+                log('🚀 Starting database fix...');
+                
+                // Wait for Firebase
+                let attempts = 0;
+                while (typeof firebase === 'undefined' && attempts < 20) {
+                    log('⏳ Waiting for Firebase...');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    attempts++;
+                }
+                
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase failed to load');
+                }
+                
+                log('✅ Firebase loaded');
+                
+                // Initialize Firebase
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAiD-pBWfSwvmIsWmHI9cCp3wn93CqshQE",
+                    authDomain: "randomacc-96218.firebaseapp.com",
+                    projectId: "randomacc-96218",
+                    storageBucket: "randomacc-96218.firebasestorage.app",
+                    messagingSenderId: "113176272821",
+                    appId: "1:113176272821:web:1eabdc70e688db379203fc",
+                    measurementId: "G-TPQH4G05C2"
+                };
+                
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                log('✅ Firebase connected');
+                
+                // Clear all data
+                log('🗑️ Clearing old data...');
+                const collections = ['users', 'gameAccounts', 'depositRequests', 'cardDepositRequests'];
+                
+                for (const collectionName of collections) {
+                    const snapshot = await db.collection(collectionName).get();
+                    if (!snapshot.empty) {
+                        const batch = db.batch();
+                        snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                        log(`✅ Cleared ${snapshot.size} docs from ${collectionName}`);
+                    }
+                }
+                
+                // Create game accounts
+                log('🎮 Creating game accounts...');
+                const accountTypes = [
+                    { name: '9k', price: 9000, image: 'acc9k.jpg' },
+                    { name: '15k', price: 15000, image: 'acc15k.jpg' },
+                    { name: '55k', price: 55000, image: 'acc55k.jpg' }
+                ];
+                
+                let totalAccounts = 0;
+                for (const type of accountTypes) {
+                    for (let i = 1; i <= 3; i++) {
+                        const account = {
+                            name: type.name,
+                            price: type.price,
+                            image: type.image,
+                            username: `user_${type.name.toLowerCase()}_${i}`,
+                            password: `pass_${type.name.toLowerCase()}_${i}`,
+                            status: 'available',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        await db.collection('gameAccounts').add(account);
+                        totalAccounts++;
+                    }
+                }
+                log(`✅ Created ${totalAccounts} game accounts`);
+                
+                // Create test user
+                log('👤 Creating test user...');
+                const testUser = {
+                    username: 'testuser',
+                    password: 'testpass',
+                    balance: 100000,
+                    transactions: [{
+                        type: 'deposit',
+                        amount: 100000,
+                        description: 'Initial deposit',
+                        timestamp: new Date().toISOString(),
+                        approved: true
+                    }],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await db.collection('users').add(testUser);
+                log('✅ Created test user (testuser/testpass) with 100,000 VNĐ');
+                
+                // Test purchase
+                log('🛒 Testing purchase...');
+                const userSnapshot = await db.collection('users').where('username', '==', 'testuser').get();
+                const accountSnapshot = await db.collection('gameAccounts').where('status', '==', 'available').limit(1).get();
+                
+                if (!userSnapshot.empty && !accountSnapshot.empty) {
+                    const userDoc = userSnapshot.docs[0];
+                    const accountDoc = accountSnapshot.docs[0];
+                    const userData = userDoc.data();
+                    const accountData = accountDoc.data();
+                    
+                    const newBalance = userData.balance - accountData.price;
+                    const transaction = {
+                        type: 'purchase',
+                        amount: -accountData.price,
+                        description: `Mua Acc Roblox ${accountData.name}`,
+                        timestamp: new Date().toISOString(),
+                        username: accountData.username,
+                        password: accountData.password
+                    };
+                    
+                    await db.collection('users').doc(userDoc.id).update({
+                        balance: newBalance,
+                        transactions: firebase.firestore.FieldValue.arrayUnion(transaction)
+                    });
+                    
+                    await db.collection('gameAccounts').doc(accountDoc.id).update({
+                        status: 'sold',
+                        soldTo: userData.username,
+                        soldAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    log(`✅ Purchase test successful! New balance: ${newBalance} VNĐ`);
+                }
+                
+                log('🎉 Database fix completed successfully!');
+                log('📝 You can now test the website with testuser/testpass');
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
