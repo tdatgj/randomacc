@@ -7,7 +7,9 @@ if (typeof userData === 'undefined') {
 }
 
 // Initialize app
-let appInitialized = false;
+if (typeof appInitialized === 'undefined') {
+    var appInitialized = false;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     if (appInitialized) return;
@@ -528,7 +530,7 @@ async function generateQR() {
     // Parse user data from localStorage
     const currentUserData = JSON.parse(storedUser);
     
-    const qrUrl = `https://qr.sepay.vn/img?acc=${getConfig('bank', 'accountNumber')}&bank=${getConfig('bank', 'bankName')}&amount=${amount}&des=${currentUserData.username}`;
+    const qrUrl = `https://qr.sepay.vn/img?acc=0363064356&bank=VPBank&amount=${amount}&des=${currentUserData.username}`;
     
     document.getElementById('qr-image').src = qrUrl;
     document.getElementById('payment-amount').textContent = parseInt(amount).toLocaleString();
