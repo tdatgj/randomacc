@@ -7,8 +7,13 @@ if (typeof userData === 'undefined') {
 }
 
 // Initialize app
+let appInitialized = false;
+
 document.addEventListener('DOMContentLoaded', function() {
+    if (appInitialized) return;
     console.log('DOM loaded, initializing app...');
+    appInitialized = true;
+    
     // Wait a bit for DOM to be fully loaded
     setTimeout(() => {
         initializeApp();
@@ -17,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Also check on window load
 window.addEventListener('load', function() {
+    if (!appInitialized) return;
     console.log('Window loaded, checking login status again...');
     setTimeout(() => {
         checkLoginStatus();

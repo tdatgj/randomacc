@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Firestore Rules</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; }
+        #result { margin-top: 20px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Test Firestore Rules</h1>
+    <button onclick="testRules()">Test Rules</button>
+    <div id="result"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        function testRules() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing Firestore Rules...';
+            
+            try {
+                // Initialize Firebase
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAiD-pBWfSwvmIsWmHI9cCp3wn93CqshQE",
+                    authDomain: "randomacc-96218.firebaseapp.com",
+                    projectId: "randomacc-96218",
+                    storageBucket: "randomacc-96218.firebasestorage.app",
+                    messagingSenderId: "113176272821",
+                    appId: "1:113176272821:web:1eabdc70e688db379203fc",
+                    measurementId: "G-TPQH4G05C2"
+                };
+                
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.firestore();
+                
+                // Test 1: Write to test collection
+                db.collection('test').add({
+                    message: 'Rules test',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then((docRef) => {
+                    resultDiv.innerHTML += '\n✅ Write test: SUCCESS';
+                    
+                    // Test 2: Read from test collection
+                    return db.collection('test').limit(1).get();
+                }).then((snapshot) => {
+                    resultDiv.innerHTML += '\n✅ Read test: SUCCESS';
+                    
+                    // Test 3: Write to users collection
+                    return db.collection('users').add({
+                        username: 'test_user',
+                        balance: 0,
+                        transactions: [],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }).then((docRef) => {
+                    resultDiv.innerHTML += '\n✅ Users write: SUCCESS';
+                    
+                    // Test 4: Write to gameAccounts collection
+                    return db.collection('gameAccounts').add({
+                        name: 'test',
+                        price: 1000,
+                        status: 'available',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }).then((docRef) => {
+                    resultDiv.innerHTML += '\n✅ GameAccounts write: SUCCESS';
+                    
+                    // Clean up
+                    return db.collection('test').limit(1).get();
+                }).then((snapshot) => {
+                    if (!snapshot.empty) {
+                        return snapshot.docs[0].ref.delete();
+                    }
+                }).then(() => {
+                    resultDiv.innerHTML += '\n\n🎉 ALL TESTS PASSED! Rules are working correctly.';
+                }).catch((error) => {
+                    resultDiv.innerHTML += `\n❌ ERROR: ${error.message}`;
+                    resultDiv.innerHTML += '\n\nSOLUTION:';
+                    resultDiv.innerHTML += '\n1. Go to Firebase Console';
+                    resultDiv.innerHTML += '\n2. Firestore Database → Rules';
+                    resultDiv.innerHTML += '\n3. Replace with:';
+                    resultDiv.innerHTML += '\n\nrules_version = "2";';
+                    resultDiv.innerHTML += '\nservice cloud.firestore {';
+                    resultDiv.innerHTML += '\n  match /databases/{database}/documents {';
+                    resultDiv.innerHTML += '\n    match /{document=**} {';
+                    resultDiv.innerHTML += '\n      allow read, write: if true;';
+                    resultDiv.innerHTML += '\n    }';
+                    resultDiv.innerHTML += '\n  }';
+                    resultDiv.innerHTML += '\n}';
+                    resultDiv.innerHTML += '\n\n4. Click Publish';
+                    resultDiv.innerHTML += '\n5. Wait 30-60 seconds';
+                });
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ ERROR: ${error.message}`;
+            }
+        }
+        
+        // Auto-run test
+        window.addEventListener('load', () => {
+            setTimeout(testRules, 1000);
+        });
+    </script>
+</body>
+</html>
