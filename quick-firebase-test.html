@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Firebase Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Quick Firebase Test</h1>
+    <button onclick="testConnection()">Test Firebase Connection</button>
+    <div id="result"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
+    
+    <script>
+        function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Test config decryption
+                const apiKey = getConfig('firebase', 'apiKey');
+                const projectId = getConfig('firebase', 'projectId');
+                
+                if (!apiKey || !projectId) {
+                    throw new Error('Failed to decrypt Firebase config');
+                }
+                
+                // Initialize Firebase
+                const firebaseConfig = {
+                    apiKey: apiKey,
+                    authDomain: getConfig('firebase', 'authDomain'),
+                    projectId: projectId,
+                    storageBucket: getConfig('firebase', 'storageBucket'),
+                    messagingSenderId: getConfig('firebase', 'messagingSenderId'),
+                    appId: getConfig('firebase', 'appId'),
+                    measurementId: getConfig('firebase', 'measurementId')
+                };
+                
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.firestore();
+                
+                // Test Firestore connection
+                db.collection('test').add({
+                    message: 'Test connection',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    resultDiv.innerHTML = '<div class="success">✅ Firebase connection successful!</div>';
+                }).catch((error) => {
+                    resultDiv.innerHTML = `<div class="error">❌ Firestore error: ${error.message}</div>`;
+                });
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
