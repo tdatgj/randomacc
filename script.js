@@ -281,6 +281,13 @@ async function checkPaymentStatus() {
         checkStatus.textContent = 'Lỗi kiểm tra giao dịch';
         checkStatus.className = 'check-status error';
         console.error('Lỗi kiểm tra giao dịch:', error);
+        
+        // Hiển thị thông báo lỗi chi tiết
+        if (error.code === 'permission-denied') {
+            showMessage('Lỗi quyền truy cập Firebase. Vui lòng kiểm tra Firestore Rules!', 'error');
+        } else {
+            showMessage('Lỗi: ' + error.message, 'error');
+        }
     }
 }
 
