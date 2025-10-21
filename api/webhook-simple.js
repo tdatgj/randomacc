@@ -20,18 +20,20 @@ export default async function handler(req, res) {
         
         const transactionData = req.body;
         
-        // Log thông tin giao dịch
+        // Log thông tin giao dịch theo format SePay
         console.log('Transaction details:', {
-            amount: transactionData.amount,
-            description: transactionData.description,
-            status: transactionData.status,
-            transactionId: transactionData.transaction_id
+            gateway: transactionData.gateway,
+            transferAmount: transactionData.transferAmount,
+            content: transactionData.content,
+            transferType: transactionData.transferType,
+            accountNumber: transactionData.accountNumber,
+            transactionDate: transactionData.transactionDate
         });
         
-        // Xử lý giao dịch thành công
-        if (transactionData.status === 'success' && transactionData.amount > 0) {
-            const username = transactionData.description;
-            console.log(`Processing payment for username: ${username}, amount: ${transactionData.amount} VNĐ`);
+        // Xử lý giao dịch tiền vào
+        if (transactionData.transferType === 'in' && transactionData.transferAmount > 0) {
+            const username = transactionData.content;
+            console.log(`Processing payment for username: ${username}, amount: ${transactionData.transferAmount} VNĐ`);
             
             // TODO: Thêm logic cộng tiền vào Firebase ở đây
             // Hiện tại chỉ log để test
@@ -43,9 +45,10 @@ export default async function handler(req, res) {
             message: 'WebHook received successfully',
             timestamp: new Date().toISOString(),
             receivedData: {
-                amount: transactionData.amount,
-                description: transactionData.description,
-                status: transactionData.status
+                gateway: transactionData.gateway,
+                transferAmount: transactionData.transferAmount,
+                content: transactionData.content,
+                transferType: transactionData.transferType
             }
         });
         

@@ -49,19 +49,21 @@ export default async function handler(req, res) {
         
         const transactionData = req.body;
         
-        // Xử lý giao dịch
-        if (transactionData.status === 'success' && transactionData.amount > 0) {
-            console.log('Processing successful transaction:', {
-                amount: transactionData.amount,
-                description: transactionData.description,
-                transactionId: transactionData.transaction_id
+        // Xử lý giao dịch theo format SePay
+        if (transactionData.transferType === 'in' && transactionData.transferAmount > 0) {
+            console.log('Processing incoming transaction:', {
+                gateway: transactionData.gateway,
+                transferAmount: transactionData.transferAmount,
+                content: transactionData.content,
+                accountNumber: transactionData.accountNumber,
+                transferType: transactionData.transferType
             });
             
-            // Tìm user dựa trên username (description field)
-            const username = transactionData.description;
+            // Tìm user dựa trên username (content field)
+            const username = transactionData.content;
             if (username) {
                 console.log(`Tìm user với username: ${username}`);
-                console.log(`Số tiền: ${transactionData.amount} VNĐ`);
+                console.log(`Số tiền: ${transactionData.transferAmount} VNĐ`);
                 
                 try {
                     // Tìm user trong Firestore với username = description
@@ -82,7 +84,7 @@ export default async function handler(req, res) {
                         await db.runTransaction(async (transaction) => {
                             const userDoc = await transaction.get(userRef);
                             const currentBalance = userDoc.exists ? userDoc.data().balance : 0;
-                            const newBalance = currentBalance + transactionData.amount;
+                            const newBalance = currentBalance + transactionData.transferAmount;
                             
                             transaction.update(userRef, {
                                 balance: newBalance,
@@ -93,17 +95,21 @@ export default async function handler(req, res) {
                             const transactionRef = db.collection('transactions').doc();
                             transaction.set(transactionRef, {
                                 userId: userId,
-                                amount: transactionData.amount,
+                                amount: transactionData.transferAmount,
                                 description: `Nạp tiền tự động - ${username}`,
                                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                                 type: 'recharge',
-                                transactionId: transactionData.transaction_id,
-                                bankCode: transactionData.bank_code,
-                                accountNumber: transactionData.account_number
+                                gateway: transactionData.gateway,
+                                accountNumber: transactionData.accountNumber,
+                                subAccount: transactionData.subAccount,
+                                code: transactionData.code,
+                                referenceCode: transactionData.referenceCode,
+                                accumulated: transactionData.accumulated,
+                                transactionDate: transactionData.transactionDate
                             });
                         });
                         
-                        console.log(`Đã cộng ${transactionData.amount} VNĐ vào tài khoản ${username}`);
+                        console.log(`Đã cộng ${transactionData.transferAmount} VNĐ vào tài khoản ${username}`);
                     } else {
                         console.log(`Không tìm thấy user với username: ${username}`);
                     }
@@ -115,11 +121,17 @@ export default async function handler(req, res) {
             }
         }
         
-        // Trả về response thành công
+        // Trả về response thành công theo format SePay yêu cầu
         res.status(200).json({ 
-            success: true, 
+            success: true,
             message: 'WebHook processed successfully',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            receivedData: {
+                gateway: transactionData.gateway,
+                transferAmount: transactionData.transferAmount,
+                content: transactionData.content,
+                transferType: transactionData.transferType
+            }
         });
         
     } catch (error) {
