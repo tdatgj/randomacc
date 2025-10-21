@@ -4,16 +4,12 @@
 // Import Firebase Admin SDK
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin (cần cấu hình service account)
+// Initialize Firebase Admin (sử dụng default credentials)
 if (!admin.apps.length) {
     try {
+        // Sử dụng default credentials từ Vercel environment
         admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: "randomacc-96218",
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            }),
-            databaseURL: `https://randomacc-96218.firebaseio.com`
+            projectId: "randomacc-96218"
         });
     } catch (error) {
         console.error('Firebase Admin initialization error:', error);
@@ -113,6 +109,8 @@ export default async function handler(req, res) {
                     }
                 } catch (firebaseError) {
                     console.error('Lỗi xử lý Firebase:', firebaseError);
+                    // Trả về response thành công ngay cả khi có lỗi Firebase
+                    // để SePay không retry
                 }
             }
         }
