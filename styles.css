@@ -336,6 +336,34 @@ body::before {
     50% { transform: translateY(-20px); }
 }
 
+.hero-image {
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-banner {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(255, 107, 53, 0.3);
+    transition: all 0.3s ease;
+    animation: heroImageFloat 6s ease-in-out infinite;
+}
+
+.hero-banner:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(255, 107, 53, 0.4);
+    border-color: rgba(255, 107, 53, 0.6);
+}
+
+@keyframes heroImageFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
 .hero h2 {
     font-size: 4.5rem;
     margin-bottom: 1.5rem;
@@ -1992,6 +2020,15 @@ input[type="text"], input[type="password"], input[type="number"], select, textar
         padding: 3rem 0;
     }
     
+    .hero-image {
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-banner {
+        max-height: 250px;
+        border-radius: 15px;
+    }
+    
     .hero h2 {
         font-size: 2.5rem;
         margin-bottom: 1rem;
@@ -2213,6 +2250,15 @@ input[type="text"], input[type="password"], input[type="number"], select, textar
     
     .hero {
         padding: 2rem 0;
+    }
+    
+    .hero-image {
+        margin-bottom: 1rem;
+    }
+    
+    .hero-banner {
+        max-height: 200px;
+        border-radius: 10px;
     }
     
     .hero h2 {
