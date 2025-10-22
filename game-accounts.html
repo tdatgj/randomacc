@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quản lý tài khoản game - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,6 +80,30 @@
             font-weight: 900;
             position: relative;
             z-index: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .admin-header {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.3rem;
+            }
         }
         
         .admin-section {
@@ -562,8 +586,9 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .admin-container {
-                margin: 1rem;
+                margin: 0.5rem;
                 padding: 1rem;
+                margin-top: 0.5rem;
             }
             
             .admin-header h1 {
@@ -612,12 +637,13 @@
         
         @media (max-width: 480px) {
             .admin-container {
-                margin: 0.5rem;
+                margin: 0.3rem;
                 padding: 0.5rem;
+                margin-top: 0.3rem;
             }
             
             .admin-header {
-                padding: 1.5rem;
+                padding: 0.8rem;
             }
             
             .admin-header h1 {
