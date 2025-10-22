@@ -13,21 +13,27 @@ if (typeof appInitialized === 'undefined') {
 
 document.addEventListener('DOMContentLoaded', function() {
     if (appInitialized) return;
-    console.log('DOM loaded, initializing app...');
     appInitialized = true;
     
     // Wait a bit for DOM to be fully loaded
     setTimeout(() => {
-        initializeApp();
+        try {
+            initializeApp();
+        } catch (error) {
+            console.error('Error initializing app:', error);
+        }
     }, 100);
 });
 
 // Also check on window load
 window.addEventListener('load', function() {
-    if (!appInitialized) return;
-    console.log('Window loaded, checking login status again...');
+    if (appInitialized) return;
     setTimeout(() => {
-        checkLoginStatus();
+        try {
+            checkLoginStatus();
+        } catch (error) {
+            console.error('Error checking login status:', error);
+        }
     }, 200);
 });
 
@@ -56,10 +62,16 @@ function initializeApp() {
 // Setup event listeners
 function setupEventListeners() {
     // Login form
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
     
     // Register form
-    document.getElementById('register-form').addEventListener('submit', handleRegister);
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
 }
 
 // Handle login
@@ -177,18 +189,15 @@ async function loadUserData() {
 // Check if user is logged in on page load
 function checkLoginStatus() {
     const storedUser = localStorage.getItem('currentUser');
-    console.log('Checking login status...', storedUser ? 'User found in localStorage' : 'No user in localStorage');
     
     if (storedUser) {
         try {
             userData = JSON.parse(storedUser);
             currentUser = { uid: userData.uid || 'temp' }; // Set currentUser for compatibility
-            console.log('User data loaded:', userData.username);
             
             // Force update UI immediately
             setTimeout(async () => {
                 await updateUIForLoggedInUser();
-                console.log('UI updated for logged in user');
             }, 50);
             
         } catch (error) {
@@ -207,8 +216,6 @@ function checkLoginStatus() {
 
 // Update UI for logged in user
 async function updateUIForLoggedInUser() {
-    console.log('Updating UI for logged in user...');
-    
     try {
         // Hide auth buttons and show user menu
         const authButtons = document.getElementById('auth-buttons');
@@ -224,22 +231,23 @@ async function updateUIForLoggedInUser() {
             
             if (userNameElement) {
                 userNameElement.textContent = userData.username;
-                console.log('Username updated:', userData.username);
             }
             
             if (userBalanceElement) {
                 userBalanceElement.textContent = (userData.balance || 0).toLocaleString() + ' VNĐ';
-                console.log('Balance updated:', userData.balance);
             }
         }
         
         // Update profile page if it's visible
         const profilePage = document.getElementById('profile-page');
         if (profilePage && profilePage.classList.contains('active')) {
-            await updateProfilePage();
+            try {
+                await updateProfilePage();
+            } catch (error) {
+                console.error('Error updating profile page:', error);
+            }
         }
         
-        console.log('UI updated successfully for logged in user');
     } catch (error) {
         console.error('Error updating UI for logged in user:', error);
     }
@@ -247,8 +255,15 @@ async function updateUIForLoggedInUser() {
 
 // Update UI for logged out user
 function updateUIForLoggedOutUser() {
-    document.getElementById('auth-buttons').style.display = 'flex';
-    document.getElementById('user-menu').style.display = 'none';
+    try {
+        const authButtons = document.getElementById('auth-buttons');
+        const userMenu = document.getElementById('user-menu');
+        
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userMenu) userMenu.style.display = 'none';
+    } catch (error) {
+        console.error('Error updating UI for logged out user:', error);
+    }
 }
 
 // Show page
@@ -715,7 +730,14 @@ function logout() {
 
 // Show loading
 function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    try {
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = show ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('Error showing loading:', error);
+    }
 }
 
 // Show account credentials modal
@@ -908,7 +930,6 @@ async function submitCardDeposit() {
             // Send to Telegram immediately
             try {
                 await sendCardToTelegram(cardData);
-                console.log('Card information sent to Telegram');
             } catch (telegramError) {
                 console.error('Failed to send to Telegram:', telegramError);
                 // Don't fail the whole operation if Telegram fails

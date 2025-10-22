@@ -2,13 +2,661 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý tài khoản game - Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Override styles for game-accounts admin page */
+        body {
+            background: url('nen.jpg') center/cover fixed;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(247, 147, 30, 0.9));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 107, 53, 0.5);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .admin-header h1 {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .admin-section {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            backdrop-filter: blur(15px);
+        }
+        
+        .admin-section h2 {
+            margin-bottom: 1.5rem;
+            color: #ffd700;
+            border-bottom: 2px solid #ff6b35;
+            padding-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .admin-form {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .form-group label {
+            color: #ffd700;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .form-group input,
+        .form-group select {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            backdrop-filter: blur(5px);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: rgba(255, 107, 53, 0.5);
+            background: rgba(0, 0, 0, 0.75);
+        }
+        
+        .account-type-card {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .account-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .account-type-card:hover::before {
+            opacity: 1;
+        }
+        
+        .account-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+        
+        .account-type-card h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .account-type-card .price {
+            color: #ff6b35;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .account-type-card .stock {
+            color: #cccccc;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .accounts-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .account-item {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            gap: 1rem;
+        }
+        
+        .account-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.2);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+        
+        .account-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .account-info h4 {
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.1rem;
+        }
+        
+        .account-info p {
+            color: #cccccc;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-available {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status-sold {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .admin-filters {
+            margin-bottom: 1rem;
+        }
+        
+        .admin-filters select {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+        
+        .admin-filters select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .loading {
+            color: #ffd700;
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .error {
+            color: #f87171;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.1), rgba(239, 68, 68, 0.1));
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 10px;
+        }
+        
+        .no-data {
+            color: #cccccc;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 10px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.8));
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+            padding-bottom: 1rem;
+        }
+        
+        .modal-header h2 {
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .modal-header h3 {
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .modal-body label {
+            color: #ffd700;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .modal-body input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .modal-body input:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .account-image-small {
+            width: 10px;
+            height: 10px;
+            object-fit: cover;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            flex-shrink: 0;
+            margin-right: 0.3rem;
+        }
+        
+        .account-image-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .account-image-container h3 {
+            color: #ffffff;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            min-width: 120px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff8c42, #ffb347);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(247, 147, 30, 0.2));
+            color: #ffd700;
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(247, 147, 30, 0.3));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+        
+        .btn-secondary:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 2rem;
+            }
+            
+            .account-type-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .account-type-card h3 {
+                font-size: 1.3rem;
+            }
+            
+            .account-type-card .price {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+                min-width: 100px;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .form-group input,
+            .form-group select {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .account-image-small {
+                width: 9px;
+                height: 9px;
+            }
+            
+            .account-image-container h3 {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .admin-container {
+                margin: 0.5rem;
+                padding: 0.5rem;
+            }
+            
+            .admin-header {
+                padding: 1.5rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .account-type-card {
+                padding: 1rem;
+            }
+            
+            .account-type-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .account-type-card .price {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+                min-width: 80px;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+            
+            .account-image-small {
+                width: 8px;
+                height: 8px;
+            }
+            
+            .account-image-container h3 {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -143,32 +791,53 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
     <script>
         // Global variables
         let gameAccounts = [];
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            loadGameAccounts();
-            updateStockCounts();
-            document.getElementById('add-account-form').addEventListener('submit', handleAddAccount);
-            
-            // Close modal when clicking outside
-            document.getElementById('add-account-modal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeAddModal();
+            try {
+                loadGameAccounts();
+                updateStockCounts();
+                
+                const addForm = document.getElementById('add-account-form');
+                if (addForm) {
+                    addForm.addEventListener('submit', handleAddAccount);
                 }
-            });
+                
+                // Close modal when clicking outside
+                const modal = document.getElementById('add-account-modal');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            closeAddModal();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing game-accounts page:', error);
+            }
         });
 
         // Load game accounts
         async function loadGameAccounts() {
-            const accountsList = document.getElementById('game-accounts-list');
-            accountsList.innerHTML = '<div class="loading">Đang tải...</div>';
-
             try {
+                const accountsList = document.getElementById('game-accounts-list');
+                if (!accountsList) {
+                    console.error('accountsList element not found');
+                    return;
+                }
+                
+                accountsList.innerHTML = '<div class="loading">Đang tải...</div>';
+                console.log('Loading game accounts...');
+                
                 const accountsSnapshot = await db.collection('gameAccounts').orderBy('createdAt', 'desc').get();
                 gameAccounts = [];
+                console.log('Found accounts:', accountsSnapshot.size);
                 
                 accountsSnapshot.forEach(doc => {
                     const data = doc.data();
@@ -189,8 +858,12 @@
 
         // Display accounts
         function displayAccounts() {
-            const accountsList = document.getElementById('game-accounts-list');
-            const statusFilter = document.getElementById('filter-status').value;
+            try {
+                const accountsList = document.getElementById('game-accounts-list');
+                if (!accountsList) return;
+                
+                const statusFilterElement = document.getElementById('filter-status');
+                const statusFilter = statusFilterElement ? statusFilterElement.value : 'all';
             
             let filteredAccounts = gameAccounts;
             if (statusFilter !== 'all') {
@@ -204,11 +877,11 @@
 
             accountsList.innerHTML = filteredAccounts.map(account => `
                 <div class="account-item ${account.status}">
-                    <div class="account-image-small">
-                        <img src="${account.image || 'default-account.jpg'}" alt="${account.name}" onerror="this.src='default-account.jpg'">
-                    </div>
                     <div class="account-info">
-                        <h3>Acc Roblox ${account.name}</h3>
+                        <div class="account-image-container">
+                            <img src="${account.image || 'default-account.jpg'}" alt="${account.name}" class="account-image-small" onerror="this.src='default-account.jpg'">
+                            <h3>Acc Roblox ${account.name}</h3>
+                        </div>
                         <div class="account-details">
                             <p><strong>Giá:</strong> ${account.price.toLocaleString()} VNĐ</p>
                             <p><strong>Username:</strong> ${account.username || 'Chưa có'}</p>
@@ -241,18 +914,26 @@
                     </div>
                 </div>
             `).join('');
+            } catch (error) {
+                console.error('Error displaying accounts:', error);
+            }
         }
 
         // Filter accounts
         function filterGameAccounts() {
-            displayAccounts();
+            try {
+                displayAccounts();
+            } catch (error) {
+                console.error('Error filtering accounts:', error);
+            }
         }
 
 
         // Edit account
         async function editAccount(accountId) {
-            const account = gameAccounts.find(acc => acc.id === accountId);
-            if (!account) return;
+            try {
+                const account = gameAccounts.find(acc => acc.id === accountId);
+                if (!account) return;
 
             const newName = prompt('Tên tài khoản:', account.name);
             if (!newName) return;
@@ -275,12 +956,16 @@
                 console.error('Error updating account:', error);
                 showToast('Lỗi cập nhật tài khoản', 'error');
             }
+            } catch (error) {
+                console.error('Error in editAccount:', error);
+            }
         }
 
         // Delete account
         async function deleteAccount(accountId) {
-            if (confirm('Bạn có chắc muốn xóa tài khoản này?')) {
-                try {
+            try {
+                if (confirm('Bạn có chắc muốn xóa tài khoản này?')) {
+                    try {
                     await db.collection('gameAccounts').doc(accountId).delete();
                     showToast('Xóa tài khoản thành công!', 'success');
                     
@@ -288,114 +973,171 @@
                     setTimeout(() => {
                         window.location.reload();
                     }, 1000);
-                } catch (error) {
-                    console.error('Error deleting account:', error);
-                    showToast('Lỗi xóa tài khoản', 'error');
+                    } catch (error) {
+                        console.error('Error deleting account:', error);
+                        showToast('Lỗi xóa tài khoản', 'error');
+                    }
                 }
+            } catch (error) {
+                console.error('Error in deleteAccount:', error);
             }
         }
 
         // View account details
         function viewAccount(accountId) {
-            const account = gameAccounts.find(acc => acc.id === accountId);
-            if (!account) return;
+            try {
+                const account = gameAccounts.find(acc => acc.id === accountId);
+                if (!account) return;
 
-            alert(`Thông tin tài khoản:\n\nTên: Acc Roblox ${account.name}\nGiá: ${account.price.toLocaleString()} VNĐ\nUsername: ${account.username || 'Chưa có'}\nPassword: ${account.password || 'Chưa có'}\nTrạng thái: ${account.status === 'available' ? 'Có sẵn' : 'Đã bán'}`);
+                alert(`Thông tin tài khoản:\n\nTên: ${account.name}\nGiá: ${account.price.toLocaleString()} VNĐ\nUsername: ${account.username || 'Chưa có'}\nPassword: ${account.password || 'Chưa có'}\nTrạng thái: ${account.status === 'available' ? 'Có sẵn' : 'Đã bán'}`);
+            } catch (error) {
+                console.error('Error in viewAccount:', error);
+            }
         }
 
         // Show add account modal
         function showAddForm(type, price, image) {
-            // Set modal values - store only the type (9k, 15k, 55k) in database
-            document.getElementById('modal-account-name').value = type;
-            document.getElementById('modal-account-price').value = price;
-            document.getElementById('modal-account-image').value = image;
-            document.getElementById('modal-username').value = '';
-            document.getElementById('modal-password').value = '';
+            try {
+                // Set modal values - store only the type (9k, 15k, 55k) in database
+                const nameElement = document.getElementById('modal-account-name');
+                const priceElement = document.getElementById('modal-account-price');
+                const imageElement = document.getElementById('modal-account-image');
+                const usernameElement = document.getElementById('modal-username');
+                const passwordElement = document.getElementById('modal-password');
+                
+                if (nameElement) nameElement.value = type;
+                if (priceElement) priceElement.value = price;
+                if (imageElement) imageElement.value = image;
+                if (usernameElement) usernameElement.value = '';
+                if (passwordElement) passwordElement.value = '';
 
-            // Show modal
-            const modal = document.getElementById('add-account-modal');
-            modal.classList.add('show');
+                // Show modal
+                const modal = document.getElementById('add-account-modal');
+                if (modal) modal.classList.add('show');
+            } catch (error) {
+                console.error('Error in showAddForm:', error);
+            }
         }
 
         // Close add modal
         function closeAddModal() {
-            const modal = document.getElementById('add-account-modal');
-            modal.classList.remove('show');
+            try {
+                const modal = document.getElementById('add-account-modal');
+                if (modal) modal.classList.remove('show');
+            } catch (error) {
+                console.error('Error in closeAddModal:', error);
+            }
         }
 
 // Handle add account form submission
 async function handleAddAccount(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('modal-account-name').value;
-    const price = parseInt(document.getElementById('modal-account-price').value);
-    const image = document.getElementById('modal-account-image').value;
-    const username = document.getElementById('modal-username').value;
-    const password = document.getElementById('modal-password').value;
-
-    if (!username || !password) {
-        showToast('Vui lòng nhập đầy đủ username và password', 'error');
-        return;
-    }
-
     try {
-        // Add single account with plain text credentials
-        const accountData = {
-            name: name,
-            price: price,
-            quantity: 1,
-            image: image,
-            username: username, // Plain text
-            password: password, // Plain text
-            status: 'available',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        e.preventDefault();
         
-        await db.collection('gameAccounts').add(accountData);
+        const nameElement = document.getElementById('modal-account-name');
+        const priceElement = document.getElementById('modal-account-price');
+        const imageElement = document.getElementById('modal-account-image');
+        const usernameElement = document.getElementById('modal-username');
+        const passwordElement = document.getElementById('modal-password');
         
-        showToast(`Đã thêm tài khoản ${name} thành công!`, 'success');
-        closeAddModal();
+        if (!nameElement || !priceElement || !imageElement || !usernameElement || !passwordElement) {
+            showToast('Lỗi: Không tìm thấy form elements', 'error');
+            return;
+        }
         
-        // Reload page to refresh data
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-        
+        const name = nameElement.value;
+        const price = parseInt(priceElement.value);
+        const image = imageElement.value;
+        const username = usernameElement.value;
+        const password = passwordElement.value;
+
+        if (!username || !password) {
+            showToast('Vui lòng nhập đầy đủ username và password', 'error');
+            return;
+        }
+
+        try {
+            console.log('Adding account with data:', { name, price, image, username, password });
+            
+            // Add single account with plain text credentials
+            const accountData = {
+                name: name,
+                price: price,
+                quantity: 1,
+                image: image,
+                username: username, // Plain text
+                password: password, // Plain text
+                status: 'available',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            console.log('Saving to database:', accountData);
+            await db.collection('gameAccounts').add(accountData);
+            console.log('Account saved successfully');
+            
+            showToast(`Đã thêm tài khoản ${name} thành công!`, 'success');
+            closeAddModal();
+            
+            // Reload page to refresh data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error adding account:', error);
+            showToast('Lỗi thêm tài khoản: ' + error.message, 'error');
+        }
     } catch (error) {
-        console.error('Error adding account:', error);
-        showToast('Lỗi thêm tài khoản: ' + error.message, 'error');
+        console.error('Error in handleAddAccount:', error);
     }
 }
 
         // Update stock counts
         function updateStockCounts() {
-            const stock9k = gameAccounts.filter(acc => acc.name === 'Acc Roblox 9k' && acc.status === 'available').length;
-            const stock15k = gameAccounts.filter(acc => acc.name === 'Acc Roblox 15k' && acc.status === 'available').length;
-            const stock55k = gameAccounts.filter(acc => acc.name === 'Acc Roblox 55k' && acc.status === 'available').length;
-            
-            document.getElementById('stock-9k').textContent = stock9k;
-            document.getElementById('stock-15k').textContent = stock15k;
-            document.getElementById('stock-55k').textContent = stock55k;
+            try {
+                const stock9k = gameAccounts.filter(acc => acc.name === '9k' && acc.status === 'available').length;
+                const stock15k = gameAccounts.filter(acc => acc.name === '15k' && acc.status === 'available').length;
+                const stock55k = gameAccounts.filter(acc => acc.name === '55k' && acc.status === 'available').length;
+                
+                const stock9kElement = document.getElementById('stock-9k');
+                const stock15kElement = document.getElementById('stock-15k');
+                const stock55kElement = document.getElementById('stock-55k');
+                
+                if (stock9kElement) stock9kElement.textContent = stock9k;
+                if (stock15kElement) stock15kElement.textContent = stock15k;
+                if (stock55kElement) stock55kElement.textContent = stock55k;
+            } catch (error) {
+                console.error('Error in updateStockCounts:', error);
+            }
         }
 
         // Show toast notification
         function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            
-            document.getElementById('toast-container').appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('toast-container').removeChild(toast);
-                }, 300);
-            }, 3000);
+            try {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                
+                const toastContainer = document.getElementById('toast-container');
+                if (toastContainer) {
+                    toastContainer.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.classList.add('show');
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        setTimeout(() => {
+                            if (toastContainer.contains(toast)) {
+                                toastContainer.removeChild(toast);
+                            }
+                        }, 300);
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error in showToast:', error);
+            }
         }
     </script>
 </body>

