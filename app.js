@@ -307,11 +307,11 @@ async function loadAccounts() {
             const data = doc.data();
             const name = data.name;
             
-            if (name.includes('9k')) {
+            if (name === '9k') {
                 accountTypes['9k'].count++;
-            } else if (name.includes('15k')) {
+            } else if (name === '15k') {
                 accountTypes['15k'].count++;
-            } else if (name.includes('55k')) {
+            } else if (name === '55k') {
                 accountTypes['55k'].count++;
             }
         });
@@ -364,9 +364,12 @@ async function buyAccountType(accountName, price, image) {
         showLoading(true);
         
         try {
+            // Extract account type from accountName (e.g., "Acc Roblox 9k" -> "9k")
+            const accountType = accountName.replace('Acc Roblox ', '');
+            
             // Find an available account of this type
             const accountsSnapshot = await db.collection('gameAccounts')
-                .where('name', '==', accountName)
+                .where('name', '==', accountType)
                 .where('status', '==', 'available')
                 .limit(1)
                 .get();
@@ -386,19 +389,15 @@ async function buyAccountType(accountName, price, image) {
             // Get account data for credentials
             const accountData = accountDoc.data();
             
-            // Decrypt credentials for transaction
-            const decryptedUsername = decrypt(accountData.username, 13);
-            const decryptedPassword = decrypt(accountData.password, 13);
-            
-            // Add transaction with decrypted credentials
+            // Add transaction with plain text credentials
             const transaction = {
                 type: 'purchase',
                 amount: -price,
                 description: `Mua ${accountName}`,
                 timestamp: new Date().toISOString(),
                 accountId: accountId,
-                username: decryptedUsername,
-                password: decryptedPassword
+                username: accountData.username,
+                password: accountData.password
             };
             
             currentUserData.balance = newBalance;
@@ -430,8 +429,8 @@ async function buyAccountType(accountName, price, image) {
             // Update global userData
             userData = currentUserData;
             
-            // Show success message with decrypted credentials
-            showToast(`Mua tài khoản thành công! Username: ${decryptedUsername}, Password: ${decryptedPassword}`, 'success');
+            // Show success message with credentials
+            showToast(`Mua tài khoản thành công! Username: ${accountData.username}, Password: ${accountData.password}`, 'success');
             await updateProfilePage();
             
             // Reload page to refresh data
@@ -510,8 +509,8 @@ async function buyAccount(accountId, price) {
             // Update global userData
             userData = currentUserData;
             
-            // Show success message with decrypted credentials
-            showToast(`Mua tài khoản thành công! Username: ${decryptedUsername}, Password: ${decryptedPassword}`, 'success');
+            // Show success message with credentials
+            showToast(`Mua tài khoản thành công! Username: ${accountData.username}, Password: ${accountData.password}`, 'success');
             await updateProfilePage();
             
         } catch (error) {

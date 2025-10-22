@@ -1,22 +1,26 @@
 // Simple encryption/decryption functions for game account credentials
 // This is a basic example - for production, use more robust encryption
 
-// Simple Caesar cipher for demo purposes
+// Simple Caesar cipher for demo purposes - encrypts ALL characters
 function encrypt(text, shift = 13) {
     let result = '';
     for (let i = 0; i < text.length; i++) {
-        let char = text[i];
-        if (char.match(/[a-z]/i)) {
-            const code = text.charCodeAt(i);
-            let shifted = code + shift;
-            if (code >= 65 && code <= 90) {
-                shifted = ((shifted - 65) % 26) + 65;
-            } else if (code >= 97 && code <= 122) {
-                shifted = ((shifted - 97) % 26) + 97;
-            }
-            char = String.fromCharCode(shifted);
+        const code = text.charCodeAt(i);
+        let shifted = code + shift;
+        
+        // Handle different character ranges
+        if (code >= 65 && code <= 90) { // A-Z
+            shifted = ((shifted - 65) % 26) + 65;
+        } else if (code >= 97 && code <= 122) { // a-z
+            shifted = ((shifted - 97) % 26) + 97;
+        } else if (code >= 48 && code <= 57) { // 0-9
+            shifted = ((shifted - 48) % 10) + 48;
+        } else if (code >= 32 && code <= 126) { // Printable ASCII
+            shifted = ((shifted - 32) % 95) + 32;
         }
-        result += char;
+        // For other characters, keep as is
+        
+        result += String.fromCharCode(shifted);
     }
     return result;
 }

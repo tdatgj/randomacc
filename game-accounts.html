@@ -14,7 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="config.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="encryption.js"></script>
     <script src="app.js"></script>
 </head>
 <body>
@@ -209,11 +208,11 @@
                         <img src="${account.image || 'default-account.jpg'}" alt="${account.name}" onerror="this.src='default-account.jpg'">
                     </div>
                     <div class="account-info">
-                        <h3>${account.name}</h3>
+                        <h3>Acc Roblox ${account.name}</h3>
                         <div class="account-details">
                             <p><strong>Giá:</strong> ${account.price.toLocaleString()} VNĐ</p>
-                            <p><strong>Username:</strong> ${account.username ? decrypt(account.username, 13) : 'Chưa có'}</p>
-                            <p><strong>Password:</strong> ${account.password ? decrypt(account.password, 13) : 'Chưa có'}</p>
+                            <p><strong>Username:</strong> ${account.username || 'Chưa có'}</p>
+                            <p><strong>Password:</strong> ${account.password || 'Chưa có'}</p>
                             <p><strong>Hình ảnh:</strong> ${account.image || 'Không có'}</p>
                             <p><strong>Trạng thái:</strong> 
                                 <span class="status-badge ${account.status}">
@@ -301,13 +300,13 @@
             const account = gameAccounts.find(acc => acc.id === accountId);
             if (!account) return;
 
-            alert(`Thông tin tài khoản:\n\nTên: ${account.name}\nGiá: ${account.price.toLocaleString()} VNĐ\nUsername: ${account.username || 'Chưa có'}\nPassword: ${account.password || 'Chưa có'}\nTrạng thái: ${account.status === 'available' ? 'Có sẵn' : 'Đã bán'}`);
+            alert(`Thông tin tài khoản:\n\nTên: Acc Roblox ${account.name}\nGiá: ${account.price.toLocaleString()} VNĐ\nUsername: ${account.username || 'Chưa có'}\nPassword: ${account.password || 'Chưa có'}\nTrạng thái: ${account.status === 'available' ? 'Có sẵn' : 'Đã bán'}`);
         }
 
         // Show add account modal
         function showAddForm(type, price, image) {
-            // Set modal values
-            document.getElementById('modal-account-name').value = `Acc Roblox ${type}`;
+            // Set modal values - store only the type (9k, 15k, 55k) in database
+            document.getElementById('modal-account-name').value = type;
             document.getElementById('modal-account-price').value = price;
             document.getElementById('modal-account-image').value = image;
             document.getElementById('modal-username').value = '';
@@ -340,18 +339,14 @@ async function handleAddAccount(e) {
     }
 
     try {
-        // Encrypt username and password
-        const encryptedUsername = encrypt(username, 13);
-        const encryptedPassword = encrypt(password, 13);
-        
-        // Add single account with encrypted credentials
+        // Add single account with plain text credentials
         const accountData = {
             name: name,
             price: price,
             quantity: 1,
             image: image,
-            username: encryptedUsername, // Encrypted
-            password: encryptedPassword, // Encrypted
+            username: username, // Plain text
+            password: password, // Plain text
             status: 'available',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
