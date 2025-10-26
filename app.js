@@ -315,7 +315,7 @@ async function loadAccounts() {
         const accountTypes = {
             '9k': { name: 'Acc Roblox 9k', price: 9000, image: 'acc9k.jpg', count: 0 },
             '15k': { name: 'Acc Roblox 15k', price: 15000, image: 'acc15k.jpg', count: 0 },
-            '55k': { name: 'Acc Roblox 55k', price: 55000, image: 'acc55k.jpg', count: 0 }
+            '55k': { name: 'Acc Roblox 55k', price: 75000, image: 'acc55k.jpg', count: 0 }
         };
         
         accountsSnapshot.forEach(doc => {
